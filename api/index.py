@@ -14,7 +14,13 @@ bot = Client("sesss", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 class TelegramWebhook(BaseModel):
     update_id: int
     message: dict
+@app.on_event("startup")
+async def startup():
+    await bot.start()
 
+@app.on_event("shutdown")
+async def shutdown():
+    await bot.stop()
 @app.post("/webhook")
 async def webhook(webhook_data: TelegramWebhook):
     update = webhook_data.message
