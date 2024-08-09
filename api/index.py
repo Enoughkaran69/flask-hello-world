@@ -16,11 +16,13 @@ class TelegramWebhook(BaseModel):
     message: dict
 @app.on_event("startup")
 async def startup():
-    await bot.start()
+    pass  # Remove this event handler
 
 @app.on_event("shutdown")
 async def shutdown():
     await bot.stop()
+
+bot.start()  # Start the Pyrogram client manually
 @app.post("/webhook")
 async def webhook(webhook_data: TelegramWebhook):
     update = webhook_data.message
