@@ -2,3 +2,4 @@ pyrogram
 requests
 Flask
 Tgcrypto
+pydantic
