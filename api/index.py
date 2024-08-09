@@ -14,22 +14,6 @@ api_hash = "43042882a789e5c2e8526d2da740b9c1"
 bot_token = "6401987505:AAHe1Tm28KiEa51lM-RBzVtpq4v7DeAe9yI"
 bot_client = Client("sesss", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
 
-class TelegramWebhook(BaseModel):
-    '''
-    Telegram Webhook Model using Pydantic for request body validation
-    '''
-    update_id: int
-    message: Optional[dict]
-    edited_message: Optional[dict]
-    channel_post: Optional[dict]
-    edited_channel_post: Optional[dict]
-    inline_query: Optional[dict]
-    chosen_inline_result: Optional[dict]
-    callback_query: Optional[dict]
-    shipping_query: Optional[dict]
-    pre_checkout_query: Optional[dict]
-    poll: Optional[dict]
-    poll_answer: Optional[dict]
 
 @app.on_message(filters.text)
 async def echo(client, message):
