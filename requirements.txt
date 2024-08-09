@@ -3,3 +3,4 @@ requests
 Flask
 Tgcrypto
 pydantic
+fastapi==0.63.0
