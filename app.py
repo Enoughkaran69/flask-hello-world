@@ -1,6 +1,9 @@
 import requests
 import logging
 from pyrogram import Client, filters
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
 # Enable logging
 logging.basicConfig(level=logging.ERROR)
@@ -11,6 +14,14 @@ api_hash = "43042882a789e5c2e8526d2da740b9c1"
 bot_token = "6401987505:AAHe1Tm28KiEa51lM-RBzVtpq4v7DeAe9yI"
 
 app = Client("sesss", api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+
+# Google Drive API credentials
+SCOPES = ['https://www.googleapis.com/auth/drive']
+SERVICE_ACCOUNT_FILE = 'path/to/service_account_key.json'
+
+creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, SCOPES)
+drive_service = build('drive', 'v3', credentials=creds)
 
 @app.on_message(filters.text)
 async def echo(client, message):
@@ -29,46 +40,21 @@ async def video_size(client, message):
         await message.reply_text(f"The size of the video is {size_in_mb:.2f} MB")
         
         
-        # Get the server URL from FileMoon API
-        url = "https://filemoonapi.com/api/upload/server"
-        params = {"key": "54845tb4kbkj7svvyig18"}
-        response = requests.get(url, params=params)
-        # Check if the response was successful
-        if response:
-            try:
-                 server_url = response.json()
-                 link = server_url['result']
-                 await message.reply_text(f"processing")
-            except ValueError:
-                logging.error("Invalid JSON response from FileMoon API")
-                await message.reply_text("Error: Invalid JSON response from FileMoon API")
-                return
-        else:
-            logging.error(f"Error: {response.status} - {response}")
-            await message.reply_text(f"Error: {response.status} - {response}")
-            return
+        
         # Download the video from Telegram
         video_file = await client.download_media(message)
 
         with open(video_file, 'rb') as f:
             # Upload the video to GoFile API
-            files = {'file': f}
-            data = {"key": "54845tb4kbkj7svvyig18"}
-            response = requests.post(link, files=files, data=data)
-            if response:
-                resulst = response.json()
-                if resulst['status'] == 200 and resulst['msg'] == 'OK':
-                    filecode = resulst['files'][0]['filecode']
-                    await message.reply_text(f"{filecode}")
-                else:
-                    logging.error(f"Error: {resulst['status']} - {resulst['msg']}")
-                    await message.reply_text(f"Error: {resulst['status']} - {resulst['msg']}")
-
-                
-            else:
-                logging.error(f"Error: {response.status} - {response}")
-                await message.reply_text(f"Error: {response.status} - {response}")
-
+             # Upload the video to Google Drive
+        file_metadata = {'name': video.file_name}
+        media = MediaFileUpload(f, mimetype='video/mp4')
+        file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+        file_id = file.get('id')
+        
+        # Get the file link
+        file_link = f"https://drive.google.com/uc?id={file_id}"
+        await message.reply_text(f"Uploaded to Google Drive: {file_link}")
 
         
 
